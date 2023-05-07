@@ -48,7 +48,7 @@ texte.pack()
 
 
 
-port = 33000
+port = 8080
 host = "127.0.0.1" 
 address = (host, port)
 try:
