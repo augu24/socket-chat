@@ -3,9 +3,35 @@ from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
 import tkinter
 
-def envoyer(event=None):
+global d
+d = 11
+
+def encrypter(texte, decalage):
+    resultat = ""
+    for char in texte:
+        if char.isupper():
+            resultat += chr((ord(char) + decalage - 65) % 26 + 65)
+        elif char.islower():
+            resultat += chr((ord(char) + decalage - 97) % 26 + 97)
+        else:
+            resultat += char
+    return resultat
+
+def decrypter(texte_chiffre, decalage):
+    resultat = ""
+    for char in texte_chiffre:
+        if char.isupper():
+            resultat += chr((ord(char) - decalage - 65) % 26 + 65)
+        elif char.islower():
+            resultat += chr((ord(char) - decalage - 97) % 26 + 97)
+        else:
+            resultat += char
+    return resultat
+
+def envoyer():
     message = monMess.get()
     monMess.set("")
+    message = encrypter(message, d)
     socketClient.send(bytes(message, "utf8"))
 
 
@@ -13,11 +39,12 @@ def recevoir():
     while True:
         try:
             message = socketClient.recv(1024).decode("utf8")
+            message = decrypter(message, d)
             listeMess.insert(tkinter.END, message)
         except:  
             break
 
-def fermeture(event=None):
+def fermeture():
     socketClient.close()
     top.quit()
 
@@ -46,16 +73,12 @@ champs.pack(pady=(10,0))
 texte = tkinter.Label(top, text="Envoyer (⏎)", fg='green',bg = "black")
 texte.pack()
 
-
-
 port = 8080
 host = "127.0.0.1" 
-address = (host, port)
-try:
-    socketClient = socket(AF_INET, SOCK_STREAM)
-    socketClient.connect(address)
-    recevoir_thread = Thread(target=recevoir)
-    recevoir_thread.start()
-    tkinter.mainloop() 
-except:
-    print("Une erreur est survenue, veuillez réessayer.")
+
+socketClient = socket(AF_INET, SOCK_STREAM)
+socketClient.connect((host, port))
+recevoir_thread = Thread(target=recevoir)
+recevoir_thread.start()
+tkinter.mainloop() 
+## print("Une erreur est survenu, veuilliez reesayer.")
