@@ -38,7 +38,7 @@ def decrypter(texte_chiffre, decalage):
             resultat += char
     return resultat
 
-def envoyer():
+def envoyer(event=None):
     message = monMess.get()
     monMess.set("")
     message = encrypter(message, d)
